@@ -5,6 +5,7 @@ from . import config
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse, JsonResponse
 from rest_framework.response import Response
+from api.classes.agent import *
 
 @csrf_exempt
 def agent_path(request):
@@ -14,10 +15,26 @@ def agent_path(request):
             selectedMap = data.get('mapName')
             selectdAgent = data.get('characterId')
 
-            map = [1, 4, 3, 2, 0]
+            map = load_map(selectedMap)
+
+            if map is None:
+                return HttpResponse(status=404)
+            
+            numRows = len(map)
+
+            coin_distance = generate_cost_matrix(map, numRows)
+
+            if selectdAgent == 1:
+                character = Aki(coin_distance)
+            #TODO ostali
+            else:
+                return JsonResponse({'error': 'Invalid character ID'})
+            
+            path = character.getPath(coin_distance)
+            path.pop(0)
 
             response_data = {
-                'updatedAgentPath': map,
+                'updatedAgentPath': path,
                 'selectedCharacterId': selectedMap,
                 'mapName': selectdAgent,
             }
