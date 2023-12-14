@@ -32,7 +32,7 @@ def agent_path(request):
             elif selectdAgent == 3:
                 character = Uki(coin_distance)
             elif selectdAgent == 4:
-                character = Jocke(coin_distance)
+                character = Micko(coin_distance)
             else:
                 return JsonResponse({'error': 'Invalid ID'})
             

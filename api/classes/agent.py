@@ -44,8 +44,9 @@ class Micko(Agent):
         super().__init__(coin_distance)
     
     def getPath(self, coin_distance):
-        #TODO a*
-        pass
+        path = a_star(coin_distance)
+
+        return path
     
 #Aki - dfs
 def dfs(coin_distance, node, visited, path):
@@ -131,3 +132,75 @@ def branch_and_bound(coin_distance):
                         pq.put((lb, new_path))
 
     return best_path
+
+#TODO Micko a star
+def a_star(coin_distance):
+    n = len(coin_distance)  # Broj čvorova
+    first_node = (0, n, 0, [0], 0)  # Početni čvor
+    list_of_nodes = [first_node]
+    heapq.heapify(list_of_nodes)
+
+    while list_of_nodes:
+        current = heapq.heappop(list_of_nodes)
+
+        if len(current[3]) == (n + 1):  # Našli smo putanju sa ciljnim čvorom
+            return current[3]
+
+        if len(current[3]) == n:  # Ako je putanja posetila sve čvorove osim ciljnog, treba se vratiti
+            remaining = [0]
+        else:
+            remaining = [i for i in range(1, n) if i not in current[3]]
+
+        expand_and_calculate(remaining, list_of_nodes, current, coin_distance, n)
+
+def expand_and_calculate(remaining, list_of_nodes, current, coin_distance, n):
+    scaled_matrix = scale_matrix(current, n, coin_distance)
+    
+    if not scaled_matrix:
+        heuristic = 0
+    else:
+        heuristic = prims_algorithm(scaled_matrix)
+
+    for i in remaining:
+        heapq.heappush(list_of_nodes, (current[4] + coin_distance[current[2]][i] + heuristic, (current[1] - 1), i, current[3] + [i], current[4] + coin_distance[current[2]][i]))
+
+def scale_matrix(current, n, coin_distance):
+    selected = [i for i in range(1, n) if i not in current[3]]
+    
+    if not selected:
+        return []
+
+    selected.append(0)
+    selected.sort()
+
+    new_list = [[coin_distance[i][j] for j in selected] for i in selected]
+    
+    return new_list
+
+def prims_algorithm(scaled_matrix):
+    inf = float('inf')
+    n = len(scaled_matrix)
+    selected_node = [0] * n
+    no_edge = 0
+    selected_node[0] = True
+    sum_all = 0
+
+    while no_edge < n - 1:
+        minimum = inf
+        a = 0
+        b = 0
+
+        for m in range(n):
+            if selected_node[m]:
+                for i in range(n):
+                    if (not selected_node[i]) and scaled_matrix[m][i]:
+                        if minimum > scaled_matrix[m][i]:
+                            minimum = scaled_matrix[m][i]
+                            a = m
+                            b = i
+
+        sum_all += scaled_matrix[a][b]
+        selected_node[b] = True
+        no_edge += 1
+
+    return sum_all
