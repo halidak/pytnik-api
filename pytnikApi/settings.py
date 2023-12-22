@@ -28,6 +28,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['.varcel.app', '.now.sh']
 
+WSGI_APPLICATION = 'pytnikApi.wsgi.app'
+
 
 # Application definition
 
